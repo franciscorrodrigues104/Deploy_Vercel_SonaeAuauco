@@ -3,6 +3,8 @@ from datetime import datetime
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 
@@ -60,7 +62,7 @@ def atualizar_check(detecao_id):
         if not utilizador or not utilizador.strip():
             return {"sucesso": False, "erro": "Utilizador obrigatório"}, 400
 
-        timestamp_check = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        timestamp_check = datetime.now(ZoneInfo("Europe/Lisbon")).strftime('%Y-%m-%d %H:%M:%S')
 
         supabase.table(SUPABASE_TABLE)\
             .update({
