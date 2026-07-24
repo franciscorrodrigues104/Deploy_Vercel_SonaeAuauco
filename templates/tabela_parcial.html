@@ -42,6 +42,12 @@
 
     checkbox.disabled = true; // evita cliques duplicados enquanto guarda
 
+    let meuUser = localStorage.getItem("nome_utilizador");
+if (!meuUser) {
+    meuUser = prompt("Insere o teu nome/username:") || "Anónimo";
+    localStorage.setItem("nome_utilizador", meuUser);
+}
+
     fetch(`/atualizar_check/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
