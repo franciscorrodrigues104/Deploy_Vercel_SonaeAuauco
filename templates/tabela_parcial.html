@@ -1,0 +1,68 @@
+{% for linha in detecoes %}
+<tr class="{{ 'linha-verificada' if linha.check else 'linha-pendente' }}">
+    <td class="area-falha" data-area="{{ linha.area_falha or 0 }}" style="display:none;"></td>
+    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">{{ linha.nome_camara or '—' }}</td>
+    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">{{ linha.timestamp_inicio }}</td>
+    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">
+        {% if linha.imagem_detecao %}
+            <img src="{{ linha.imagem_detecao }}" 
+                 title="Ver imagens"
+                 style="width: 50px; border-radius: 4px; cursor: zoom-in; border: 2px solid #ffffff;"
+                 onclick="abrirModal('{{ linha.imagem_detecao }}', '{{ linha.imagem_original }}')">
+        {% else %}
+            <span style="color: #999; font-size: 0.8rem;">Sem foto</span>
+        {% endif %}
+    </td>
+    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">
+    <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+        <input type="checkbox"
+               data-id="{{ linha.id }}"
+               {% if linha.check %}checked{% endif %}
+               onchange="atualizarCheck(this)"
+               style="width: 22px; height: 22px; accent-color: #83BE42;">
+        <button type="button" onclick="abrirHistorico('{{ linha.id }}')" title="Ver histórico de verificações"
+                style="padding: 4px 10px; cursor: pointer; background:#333; color:white; border:none; border-radius:4px; font-size:0.75rem;">
+            Histórico
+        </button>
+    </div>
+</td>
+</tr>
+{% endfor %}
+
+<script>
+    (function() {
+        var el = document.getElementById("num-contador");
+        if (el) { el.innerText = "{{ total }}"; }
+    })();
+
+    function atualizarCheck(checkbox) {
+    const id = checkbox.dataset.id;
+    const linha = checkbox.closest("tr");
+    const novoValor = checkbox.checked ? 1 : 0;
+
+    checkbox.disabled = true; // evita cliques duplicados enquanto guarda
+
+    fetch(`/atualizar_check/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ check: novoValor })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Falha ao atualizar");
+        checkbox.disabled = false;
+        if (novoValor === 1) {
+            linha.classList.remove("linha-pendente");
+            linha.classList.add("linha-verificada");
+        } else {
+            linha.classList.remove("linha-verificada");
+            linha.classList.add("linha-pendente");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        checkbox.checked = !checkbox.checked; // reverte a mudança
+        checkbox.disabled = false;
+        alert("Não foi possível guardar. Tenta novamente.");
+    });
+}
+</script>
