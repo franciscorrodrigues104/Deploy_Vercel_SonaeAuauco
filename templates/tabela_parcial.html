@@ -68,7 +68,7 @@ if (!meuUser) {
     fetch(`/atualizar_check/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ check: novoValor })
+        body: JSON.stringify({ check: novoValor, utilizador: meuUser })
     })
     .then(res => {
         if (!res.ok) throw new Error("Falha ao atualizar");
