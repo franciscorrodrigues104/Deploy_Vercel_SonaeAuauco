@@ -55,15 +55,17 @@ def atualizar_check(detecao_id):
         dados = request.get_json(silent=True) or {}
         novo_valor = 1 if dados.get("check") else 0
         
-        # Na nuvem, se não houver um utilizador de sistema direto, definimos um fallback
-        utilizador = "utilizador_web"
+        # Pega no nome enviado pelo frontend e valida se realmente existe
+        utilizador = dados.get("utilizador")
+        if not utilizador or not utilizador.strip():
+            return {"sucesso": False, "erro": "Utilizador obrigatório"}, 400
 
         timestamp_check = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         supabase.table(SUPABASE_TABLE)\
             .update({
                 "check": novo_valor,
-                "utilizador_check": utilizador,
+                "utilizador_check": utilizador.strip(),
                 "timestamp_check": timestamp_check,
             })\
             .eq("id", detecao_id)\
@@ -71,12 +73,12 @@ def atualizar_check(detecao_id):
 
         supabase.table("historico_checks").insert({
             "detecao_id": detecao_id,
-            "user": utilizador,
+            "user": utilizador.strip(),
             "acao": "check" if novo_valor else "uncheck",
             "timestamp": timestamp_check,
         }).execute()
 
-        return {"sucesso": True, "check": novo_valor, "utilizador": utilizador, "timestamp_check": timestamp_check}, 200
+        return {"sucesso": True, "check": novo_valor, "utilizador": utilizador.strip(), "timestamp_check": timestamp_check}, 200
     except Exception as e:
         print(f"Erro ao atualizar check (id={detecao_id}): {e}")
         return {"sucesso": False}, 500

@@ -35,7 +35,24 @@
         if (el) { el.innerText = "{{ total }}"; }
     })();
 
+
+    function obterOuPedirUtilizador() {
+    let meuUser = localStorage.getItem("nome_utilizador");
+    
+    // Enquanto não houver um nome válido, continua a pedir em loop
+    while (!meuUser || meuUser.trim() === "") {
+        meuUser = prompt("Por favor, insere o teu nome para continuar:");
+        if (meuUser !== null) {
+            meuUser = meuUser.trim();
+        }
+    }
+    
+    localStorage.setItem("nome_utilizador", meuUser);
+    return meuUser;
+}
+
     function atualizarCheck(checkbox) {
+        const utilizadorObrigatorio = obterOuPedirUtilizador();
     const id = checkbox.dataset.id;
     const linha = checkbox.closest("tr");
     const novoValor = checkbox.checked ? 1 : 0;
