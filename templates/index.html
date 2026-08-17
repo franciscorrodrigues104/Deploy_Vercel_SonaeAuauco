@@ -269,25 +269,6 @@ function fecharModal() {
     resetarZoom();
 }
 
-function resetarZoom() {
-    zoomWidth = null;
-    imagemAmpliada = null;
-
-    ["imgDetecao", "imgOriginal"].forEach(id => {
-        const img = document.getElementById(id);
-        img.style.width = "";
-        img.style.maxWidth = "42vw";
-        img.style.maxHeight = "60vh";
-        img.style.opacity = "1";
-        img.style.cursor = "zoom-in";
-    });
-
-    document.getElementById("boxDetecao").style.overflow = "hidden";
-    document.getElementById("boxOriginal").style.overflow = "hidden";
-    document.getElementById("wrapDetecao").style.flex = "1";
-    document.getElementById("wrapOriginal").style.flex = "1";
-}
-
 function ampliarImagem(imgId) {
     if (imagemAmpliada === imgId) {
         resetarZoom();
@@ -304,12 +285,13 @@ function ampliarImagem(imgId) {
     const wPrincipal = imgId === "imgDetecao" ? "wrapDetecao" : "wrapOriginal";
     const wOutra     = imgId === "imgDetecao" ? "wrapOriginal" : "wrapDetecao";
 
-    principal.style.maxWidth  = "none";
-    principal.style.maxHeight = "none";
-    principal.style.width     = "70vw";
-    principal.style.cursor    = "zoom-out";
-    principal.style.opacity   = "1";
-    zoomWidth = principal.getBoundingClientRect().width;
+    // Mostra a imagem inteira, ajustada à caixa (sem cortar nem exigir scroll)
+   principal.style.width     = "50vw";
+principal.style.maxWidth  = "none";
+principal.style.height    = "auto";
+principal.style.maxHeight = "60vh";
+principal.style.cursor    = "zoom-out";
+principal.style.opacity   = "1";
 
     outra.style.maxWidth  = "14vw";
     outra.style.maxHeight = "30vh";
@@ -318,7 +300,34 @@ function ampliarImagem(imgId) {
 
     document.getElementById(wPrincipal).style.flex = "3";
     document.getElementById(wOutra).style.flex     = "0.5";
-    document.getElementById(activeBoxId).style.overflow = "auto";
+
+    // A caixa cresce com a imagem em vez de a cortar
+    const box = document.getElementById(activeBoxId);
+    box.style.height   = "auto";
+    box.style.overflow = "visible";
+}
+
+function resetarZoom() {
+    zoomWidth = null;
+    imagemAmpliada = null;
+
+    ["imgDetecao", "imgOriginal"].forEach(id => {
+        const img = document.getElementById(id);
+        img.style.width = "";
+        img.style.maxWidth = "42vw";
+        img.style.maxHeight = "60vh";
+        img.style.opacity = "1";
+        img.style.cursor = "zoom-in";
+    });
+
+    ["boxDetecao", "boxOriginal"].forEach(id => {
+        const box = document.getElementById(id);
+        box.style.height = "60vh";
+        box.style.overflow = "hidden";
+    });
+
+    document.getElementById("wrapDetecao").style.flex = "1";
+    document.getElementById("wrapOriginal").style.flex = "1";
 }
 
 // ZOOM com scroll do rato
@@ -337,6 +346,12 @@ function ampliarImagem(imgId) {
         this.style.width     = zoomWidth + "px";
         this.style.maxWidth  = "none";
         this.style.maxHeight = "none";
+
+        // A partir daqui é zoom real, por isso ativa scroll na caixa
+        const activeBoxId = id === "imgDetecao" ? "boxDetecao" : "boxOriginal";
+        const box = document.getElementById(activeBoxId);
+        box.style.height   = "60vh";
+        box.style.overflow = "auto";
     }, { passive: false });
 });
 
