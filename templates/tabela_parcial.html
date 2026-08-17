@@ -16,7 +16,7 @@
     <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">
         <input type="checkbox"
                data-id="{{ linha.id }}"
-               {% if linha.check %}checked disabled{% endif %}
+               {% if linha.check %}checked{% endif %}
                onchange="atualizarCheck(this)"
                style="width: 22px; height: 22px; accent-color: #83BE42;">
     </td>
@@ -47,16 +47,10 @@
     }
 
     function atualizarCheck(checkbox) {
-        // Impede desmarcar — só permite passar de não-check para check
-        if (!checkbox.checked) {
-            checkbox.checked = true;
-            return;
-        }
-
         const meuUser = obterOuPedirUtilizador();
         const id = checkbox.dataset.id;
         const linha = checkbox.closest("tr");
-        const novoValor = 1;
+        const novoValor = checkbox.checked ? 1 : 0;
 
         checkbox.disabled = true; // evita cliques duplicados enquanto guarda
 
@@ -67,14 +61,19 @@
         })
         .then(res => {
             if (!res.ok) throw new Error("Falha ao atualizar");
-            linha.classList.remove("linha-pendente");
-            linha.classList.add("linha-verificada");
-            // checkbox mantém-se disabled — não é reativada, pois já não pode ser desmarcada
+            checkbox.disabled = false;
+            if (novoValor === 1) {
+                linha.classList.remove("linha-pendente");
+                linha.classList.add("linha-verificada");
+            } else {
+                linha.classList.remove("linha-verificada");
+                linha.classList.add("linha-pendente");
+            }
         })
         .catch(err => {
             console.error(err);
-            checkbox.checked = false; // reverte a mudança visual
-            checkbox.disabled = false; // permite tentar novamente
+            checkbox.checked = !checkbox.checked; // reverte a mudança
+            checkbox.disabled = false;
             alert("Não foi possível guardar. Tenta novamente.");
         });
     }
